@@ -1,5 +1,9 @@
 *.py[cod]
 
+spotify_appkey.key
+ignored/*
+tmp/*
+.idea/*
 # C extensions
 *.so
 
