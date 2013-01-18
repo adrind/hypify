@@ -5,14 +5,17 @@ from spotify.manager import (SpotifySessionManager, SpotifyPlaylistManager,
     SpotifyContainerManager)
 from spotify import PlaylistContainer, SpotifyError
 import sys
+import threading
+
+playlist_loaded = threading.Event()
+
 
 class Hypify(SpotifySessionManager):
     def __init__(self, *a, **kw):
         SpotifySessionManager.__init__(self, *a, **kw)
         self.pcntr = None
-        self.pname = 'testing'
+        self.pname = 'testing2'
         self.current_p = None
-        #self.pman = HypifyPlaylistManager()
 
     #called on login success
     def logged_in(self, session, error):
@@ -21,13 +24,23 @@ class Hypify(SpotifySessionManager):
         else:
             print "Success - logged in welcome " + str(session.display_name())
             self.pcntr = session.playlist_container()
+            self.pcntr.add_playlist_added_callback(self, self.block_until_loaded)
             #creates playlist 'pname' if it doesn't already exist
             if not self.p_exists(self.pname):
                 print "Making new playlist " + str(self.pname)
                 self.pcntr.add_new_playlist(self.pname)
                 self.current_p = self.pcntr[0]
             print "Grabbing"
+            playlist_loaded.wait()
             self.grab_tracks(session)
+
+
+    def block_until_loaded(self, pc, p, pos, userdata):
+        print "In here"
+        while not p.is_loaded:
+            pass
+        self.current_p = p
+        playlist_loaded.set()
 
     #checks if pname is a playlist
     def p_exists(self, pname):
@@ -35,6 +48,7 @@ class Hypify(SpotifySessionManager):
             if plist.name() == self.pname:
                 self.current_p = plist
                 print "Found playlist " + str(self.pname)
+                playlist_loaded.set()
                 return True
         return False
 
