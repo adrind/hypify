@@ -34,7 +34,6 @@ class Hypify(SpotifySessionManager):
             playlist_loaded.wait()
             self.grab_tracks(session)
 
-
     def block_until_loaded(self, pc, p, pos, userdata):
         print "In here"
         while not p.is_loaded:
@@ -66,8 +65,7 @@ class Hypify(SpotifySessionManager):
         print "Found songs from adrind"
         for song in songs:
             print "Searching for " + str(song)
-            session.search(str(song), self.find_song)
-        self.disconnect()
+            session.search(str(song), self.find_song, userdata=str(song))
 
     def parse_artist(self, song):
         artist, title = song.strip().split('-')
@@ -76,10 +74,10 @@ class Hypify(SpotifySessionManager):
     def find_song(self, results, userdata):
         if results.tracks():
             tracks = results.tracks()
-            print "Added a song to " + str(self.current_p.name())
+            print "Added " + str(userdata)+ " to " + str(self.current_p.name())
             self.current_p.add_tracks(0, [tracks[0]])
         else:
-            print "Could not find"
+            print "Could not find " + str(userdata)
 
 if __name__ == "__main__":
     parser=ArgumentParser(prog='hypify', description='Syncs Spotify and Hypem.')
@@ -95,5 +93,3 @@ if __name__ == "__main__":
     except SpotifyError:
         print "Error: Must specify Spotify username/password"
     sys.exit()
-
-
