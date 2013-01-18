@@ -24,7 +24,7 @@ class Hypify(SpotifySessionManager):
         else:
             print "Success - logged in welcome " + str(session.display_name())
             self.pcntr = session.playlist_container()
-            self.pcntr.add_playlist_added_callback(self, self.block_until_loaded)
+            self.pcntr.add_playlist_added_callback(self.block_until_loaded)
             #creates playlist 'pname' if it doesn't already exist
             if not self.p_exists(self.pname):
                 print "Making new playlist " + str(self.pname)
